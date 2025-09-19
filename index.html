@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hitung PBB Jabodetabek</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fef6e4;
+      color: #001858;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #fcd5ce;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #4f3c4c;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    input[readonly] {
+      background-color: #eee;
+      cursor: not-allowed;
+    }
+
+    button {
+      background-color: #a3c4f3;
+      color: #001858;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      margin-top: 20px;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #8ecae6;
+    }
+
+    .result {
+      background-color: #d8e2dc;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .explanation {
+      background-color: #ffffffaa;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #555;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Kalkulator PBB WILAYAH JAKARTA</h1>
+    <form id="pbbForm">
+
+      <label for="daerah">Pilih Daerah</label>
+      <select id="daerah" required>
+        <option value="">Pilih Daerah</option>
+        <option value="Pademangan">Pademangan</option>
+        <option value="Kelapa_Gading">Kelapa Gading</option>
+        <option value="Matraman_Salemba">Matraman Salemba</option>
+        <option value="Menteng">Menteng</option>
+        <option value="Pasar_Minggu">Pasar Minggu</option>
+        <option value="Kebayoran_Baru">Kebayoran Baru</option>
+      </select>
+
+      <label for="luasTanah">Luas Tanah (m²)</label>
+      <input type="text" id="luasTanah" required />
+
+      <label for="njopTanah">NJOP Tanah (per m²)</label>
+      <input type="text" id="njopTanah" readonly />
+
+      <label for="luasBangunan">Luas Bangunan (m²)</label>
+      <input type="text" id="luasBangunan" required />
+
+      <label for="njopBangunan">NJOP Bangunan (per m²)</label>
+      <input type="text" id="njopBangunan" readonly />
+
+      <button type="submit">Hitung PBB</button>
+    </form>
+
+    <div class="result" id="result"></div>
+    <div class="explanation" id="explanation"></div>
+  </div>
+
+  <footer>
+    &copy; 2025 - Kalkulator PBB Jabodetabek oleh Kelompok 6 ✨
+  </footer>
+
+  <script>
+    const njopData = {
+      "Pademangan": 7000000,
+      "Kelapa_Gading": 38000000,
+      "Matraman_Salemba": 1573000,
+      "Menteng": 5095000,
+      "Pasar_Minggu": 18000000,
+      "Kebayoran_Baru": 50000000
+    };
+
+    const NJOP_BANGUNAN = 28000000;
+
+    // Format ribuan untuk luas
+    function formatNumber(value) {
+      return value.replace(/\D/g, "")
+                  .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function parseNumber(value) {
+      return parseFloat(value.replace(/\./g, "")) || 0;
+    }
+
+    // Format Rupiah
+    function formatRupiah(value) {
+      return "Rp " + value.toLocaleString("id-ID");
+    }
+
+    function parseRupiah(value) {
+      return parseFloat(value.replace(/[^\d]/g, "")) || 0;
+    }
+
+    // Update NJOP ketika daerah dipilih
+    document.getElementById("daerah").addEventListener("change", function () {
+      const daerah = this.value;
+      if (daerah && njopData[daerah]) {
+        document.getElementById("njopTanah").value = formatRupiah(njopData[daerah]);
+        document.getElementById("njopBangunan").value = formatRupiah(NJOP_BANGUNAN);
+      } else {
+        document.getElementById("njopTanah").value = "";
+        document.getElementById("njopBangunan").value = "";
+      }
+    });
+
+    // Event: format ribuan untuk luas tanah & bangunan
+    document.getElementById("luasTanah").addEventListener("input", function () {
+      this.value = formatNumber(this.value);
+    });
+
+    document.getElementById("luasBangunan").addEventListener("input", function () {
+      this.value = formatNumber(this.value);
+    });
+
+    // Hitung PBB
+    document.getElementById("pbbForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const luasTanah = parseNumber(document.getElementById("luasTanah").value);
+      const njopTanah = parseRupiah(document.getElementById("njopTanah").value);
+      const luasBangunan = parseNumber(document.getElementById("luasBangunan").value);
+      const njopBangunan = parseRupiah(document.getElementById("njopBangunan").value);
+
+      if (
+        isNaN(luasTanah) ||
+        isNaN(njopTanah) ||
+        isNaN(luasBangunan) ||
+        isNaN(njopBangunan)
+      ) {
+        alert("Mohon isi semua data dengan benar.");
+        return;
+      }
+
+      const totalNJOPTanah = luasTanah * njopTanah;
+      const totalNJOPBangunan = luasBangunan * njopBangunan;
+      const totalNJOP = totalNJOPTanah + totalNJOPBangunan;
+
+      const NJOPTKP = 12000000;
+      const DPP = Math.max(totalNJOP - NJOPTKP, 0);
+
+      const persenNJKP = totalNJOP <= 1000000000 ? 0.2 : 0.4;
+      const NJKP = DPP * persenNJKP;
+
+      const tarifPBB = 0.005;
+      const PBB = NJKP * tarifPBB;
+
+      // Output hasil
+      document.getElementById("result").innerHTML = `
+        Total NJOP: ${formatRupiah(totalNJOP)}<br>
+        NJKP (${persenNJKP * 100}% dari DPP): ${formatRupiah(NJKP)}<br>
+        Tarif PBB: 0,5%<br>
+        <strong>PBB Terutang: ${formatRupiah(PBB)}</strong>
+      `;
+
+      // Penjelasan
+      document.getElementById("explanation").innerHTML = `
+        <strong>Penjelasan Perhitungan:</strong><br>
+        - NJOP Tanah = ${luasTanah.toLocaleString("id-ID")} m² × ${formatRupiah(njopTanah)} = ${formatRupiah(totalNJOPTanah)}<br>
+        - NJOP Bangunan = ${luasBangunan.toLocaleString("id-ID")} m² × ${formatRupiah(njopBangunan)} = ${formatRupiah(totalNJOPBangunan)}<br>
+        - Total NJOP = NJOP Tanah + NJOP Bangunan = ${formatRupiah(totalNJOP)}<br>
+        - NJOPTKP (Pengurangan) = ${formatRupiah(NJOPTKP)}<br>
+        - DPP = NJOP - NJOPTKP = ${formatRupiah(DPP)}<br>
+        - Karena NJOP ${totalNJOP <= 1000000000 ? "≤" : ">"} Rp 1 Miliar, maka NJKP = ${persenNJKP * 100}% × DPP<br>
+        - NJKP = ${formatRupiah(NJKP)}<br>
+        - PBB = 0.5% × NJKP = ${formatRupiah(PBB)}
+      `;
+    });
+  </script>
+</body>
+</html>
